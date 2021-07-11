@@ -5,6 +5,7 @@ import './bootstrap-override.scss'
 import App from './App';
 import UserSignupPage from './pages/UserSingupPage';
 import reportWebVitals from './reportWebVitals';
+import './i18n'
 
 ReactDOM.render(<UserSignupPage />, document.getElementById('root')
 );
