@@ -13,18 +13,28 @@ export function withApiProgress(WrappedComponent, apiPath) {
         }
 
         componentDidMount() {
-            axios.interceptors.request.use((request) => {
-                this.updateApiCallFor(request.url, true);
-                return request;
-            })
-            axios.interceptors.response.use(response => {
-                this.updateApiCallFor(response.config.url, false);
-                return response;
-            }, error => {
-                this.updateApiCallFor(error.config.url, false);
-                throw error;
-            }
+            this.requestInterceptor = axios.interceptors.request.use(
+                request => {
+                    console.log("nb", apiPath)
+                    this.updateApiCallFor(request.url, true);
+                    return request;
+                })
+            this.responseInterceptor = axios.interceptors.response.use(
+                response => {
+                    this.updateApiCallFor(response.config.url, false);
+                    return response;
+                },
+                error => {
+                    this.updateApiCallFor(error.config.url, false);
+                    throw error;
+                }
             )
+        }
+
+        componentWillUnmount() {
+            axios.interceptors.request.eject(this.requestInterceptor);
+            axios.interceptors.response.eject(this.responseInterceptor);
+
         }
         updateApiCallFor = (url, inProgress) => {
             if (url === apiPath) {
