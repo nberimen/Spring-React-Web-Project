@@ -1,14 +1,13 @@
-import React, { Component } from 'react';
+import React from 'react';
 import logo from '../assets/hoaxify.png';
 import { Link } from 'react-router-dom';
 import { withTranslation } from 'react-i18next';
 import { connect } from 'react-redux';
 import {logoutSuccess} from '../redux/authActions'
 
-class TopBar extends Component {
 
-    render() {
-        const { t, isLoggedIn, username, onLogoutSuccess } = this.props;
+const TopBar = (props) => {
+        const { t, isLoggedIn, username, onLogoutSuccess } = props;
 
         let links = (
             <ul className="navbar-nav ms-auto">
@@ -50,11 +49,11 @@ class TopBar extends Component {
             </div>
         )
 
-
-    }
 }
 
 const TopBarWithTranslation = withTranslation()(TopBar);
+
+
 
 const mapStateToProps = (store) => {
     return {

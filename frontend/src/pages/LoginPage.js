@@ -7,23 +7,17 @@ import { connect } from 'react-redux'
 import { loginHandler} from '../redux/authActions';
 
 
-//import { Authentication } from '../shared/AuthenticationContext';
-
 const LoginPage = (props) => { 
-
-    //static contextType = Authentication;
 
     const [username, setUsername] = useState();
     const [password, setPassword] = useState();
     const [error, setError] = useState();
 
+    
     useEffect(() => {
         setError(undefined);
     },[username, password])
    
-
-    
-    
 
     const onClickLogin = async event => {
         event.preventDefault();
