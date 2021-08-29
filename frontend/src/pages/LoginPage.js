@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import Input from '../components/input';
 import { withTranslation } from 'react-i18next'
 import ButtonWithProgress from '../components/ButtonWithProgress'
@@ -9,53 +9,43 @@ import { loginHandler} from '../redux/authActions';
 
 //import { Authentication } from '../shared/AuthenticationContext';
 
-class LoginPage extends React.Component {
+const LoginPage = (props) => { 
 
     //static contextType = Authentication;
 
-    state = {
-        username: null,
-        password: null,
-        error: null
-    }
+    const [username, setUsername] = useState();
+    const [password, setPassword] = useState();
+    const [error, setError] = useState();
+
+    useEffect(() => {
+        setError(undefined);
+    },[username, password])
+   
 
     
-    onChange = event => {
-        const { name, value } = event.target;
-        this.setState({
-            [name]: value,
-            error: null
-        })
-    }
+    
 
-    onClickLogin = async event => {
+    const onClickLogin = async event => {
         event.preventDefault();
-        const { username, password } = this.state;
-        
+      
         const creds = {
             username,
             password
         };
 
-        const {history, dispatch} = this.props;
+        const {history, dispatch} = props;
         const {push} = history;
-        this.setState({
-            error: null
-        })
+        
+        setError(undefined);
         try {
             await dispatch(loginHandler( creds ))
-            
             push('/');
         } catch (apiError) {
-            this.setState({
-                error: apiError.response.data.message
-            })
+            setError(apiError.response.data.message);
         }
     }
 
-    render() {
-        const { t, pendingApiCall} = this.props;
-        const {username, password, error} = this.state;
+        const { t, pendingApiCall} = props;
 
         const buttonEnabled = username && password;
         return (
@@ -63,22 +53,20 @@ class LoginPage extends React.Component {
                 <form>
                     <h1 className="text-center">{t('Login')}</h1>
                     <Input
-                        name="username"
                         label={t('Username')}
-                        onChange={this.onChange}
+                        onChange={ (event) => setUsername(event.target.value) }
                     />
                     <Input
-                        name="password"
                         label={t('Password')}
                         type="password"
-                        onChange={this.onChange}
+                        onChange={ (event) => setPassword(event.target.value) }
                     />
                    {error && <div className="alert alert-danger">
                         {error}
                     </div>}
                     <div className="text-center">
                         <ButtonWithProgress
-                            onClick={this.onClickLogin}
+                            onClick={onClickLogin}
                             disabled={!buttonEnabled || pendingApiCall}
                             pendingApiCall= {pendingApiCall}
                             text= {t('Login')}
@@ -88,8 +76,7 @@ class LoginPage extends React.Component {
             </div>
 
         )
-    }
-
+    
 }
 const LoginPageWithTranslation = withTranslation()(LoginPage);
 
