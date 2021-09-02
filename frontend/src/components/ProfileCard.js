@@ -4,24 +4,46 @@ import { useSelector } from 'react-redux';
 import ProfileImageWithDefault from './ProfileImageWithDefault';
 import { useTranslation } from 'react-i18next';
 import Input from './Input'
+import { updateUser } from '../api/apiCalls'
+import { useApiProgress } from '../shared/ApiProgress';
+import ButtonWithProgress from './ButtonWithProgress'
 const ProfileCard = (props) => {
     const [inEditMode, setInEditMode] = useState(false);
     const [updatedDisplayName, setUpdatedDisplayName] = useState();
     const { username: loggedInUsername } = useSelector(store => ({ username: store.username }));
     const routeParams = useParams();
+    const [user, setUser] = useState({});
 
+    useEffect(() => {
+        setUser(props.user);
+    }, [props.user])
     const { t } = useTranslation();
-    const { user } = props;
+    // const { user } = props;
     const { username, displayName, image } = user;
 
     useEffect(() => {
-        if(!inEditMode){
+        if (!inEditMode) {
             setUpdatedDisplayName(undefined);
-        }else{
+        } else {
             setUpdatedDisplayName(displayName);
         }
     }, [inEditMode, displayName])
 
+    const onClickSave = async () => {
+        const body = {
+            displayName: updatedDisplayName
+        }
+        try {
+            const response = await updateUser(username, body);
+            setInEditMode(false);
+            setUser(response.data)
+        } catch (error) {
+
+        }
+
+    }
+
+    const pendingApiCall = useApiProgress('put', '/api/1.0/users/' + username);
 
     const pathUsername = routeParams.username;
 
@@ -30,9 +52,6 @@ const ProfileCard = (props) => {
         message = "We can edit";
     }
 
-    const onClickSave = () => {
-        console.log(updatedDisplayName);
-    }
     return (
         <div className="card  text-center">
             <div className="card-header">
@@ -63,10 +82,24 @@ const ProfileCard = (props) => {
                             onChange={(event) => { setUpdatedDisplayName(event.target.value) }}
                         />
                         <div>
-                            <button className="btn btn-secondary d-inline-flex" onClick={onClickSave}>
-                                <span className="material-icons">save</span>{t('Save')}
-                            </button>
-                            <button className="btn btn-danger d-inline-flex ms-1" onClick={() => setInEditMode(false)}>
+
+                            <ButtonWithProgress
+                                className="btn btn-secondary d-inline-flex"
+                                onClick={onClickSave}
+                                disabled={pendingApiCall}
+                                pendingApiCall={pendingApiCall}
+                                text={
+                                    <>
+                                        <span className="material-icons">save</span>
+                                        {t('Save')}
+                                    </>
+                                }
+                            />
+                            <button 
+                            className="btn btn-danger d-inline-flex ms-1" 
+                            onClick={() => setInEditMode(false)}
+                            disabled={pendingApiCall}
+                            >
                                 <span className="material-icons">close</span>{t('Cancel')}
                             </button>
                         </div>
