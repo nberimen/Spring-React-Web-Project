@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import Input from '../components/input';
+import Input from '../components/Input';
 import { useTranslation } from 'react-i18next'
 import ButtonWithProgress from '../components/ButtonWithProgress'
 import { useApiProgress } from '../shared/ApiProgress';
@@ -41,7 +41,7 @@ const LoginPage = (props) => {
 
         const { t } = useTranslation();
 
-        const pendingApiCall = useApiProgress('api/1.0/auth');
+        const pendingApiCall = useApiProgress('post','api/1.0/auth');
 
         const buttonEnabled = username && password;
         return (
