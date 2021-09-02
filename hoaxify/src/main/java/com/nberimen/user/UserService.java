@@ -6,6 +6,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.nberimen.error.NotFoundException;
+import com.nberimen.user.vm.UserUpdateVM;
 
 @Service
 public class UserService {
@@ -45,5 +46,13 @@ public class UserService {
 			throw new NotFoundException();
 		}
 		return inDB;
+	}
+
+
+
+	public User updateUser(String username, UserUpdateVM updatedUser) {
+		User inDB = getByUsername(username);
+		inDB.setDisplayName(updatedUser.getDisplayName());
+		return userRepository.save(inDB);
 	}
 }
