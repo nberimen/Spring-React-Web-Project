@@ -1,12 +1,16 @@
 package com.nberimen.user;
 
+import java.io.IOException;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.nberimen.error.NotFoundException;
+import com.nberimen.file.FileService;
 import com.nberimen.user.vm.UserUpdateVM;
+
 
 @Service
 public class UserService {
@@ -15,11 +19,13 @@ public class UserService {
 	
 	PasswordEncoder passwordEncoder;
 	
+	FileService fileService;
 	
 	
-	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,FileService fileService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
+		this.fileService= fileService;
 	}
 
 
@@ -53,6 +59,20 @@ public class UserService {
 	public User updateUser(String username, UserUpdateVM updatedUser) {
 		User inDB = getByUsername(username);
 		inDB.setDisplayName(updatedUser.getDisplayName());
+		if(updatedUser.getImage() != null) {
+			String oldImageName = inDB.getImage();
+			try {
+				String storedFileName = fileService.writeBase64EncodedStringToFile(updatedUser.getImage());
+				inDB.setImage(storedFileName);
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			fileService.delete(oldImageName);
+		}
 		return userRepository.save(inDB);
 	}
+
+
+
+	
 }
