@@ -9,17 +9,28 @@ import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
+
 import com.nberimen.configuration.AppConfiguration;
 
 @Service
 public class FileService {
 	
-	@Autowired
+	
 	AppConfiguration appConfiguration;
+	Tika tika;
+	
+	
+	public FileService(AppConfiguration appConfiguration) {
+		super();
+		this.appConfiguration = appConfiguration;
+		tika = new Tika();
+	}
+
 	
 	public String writeBase64EncodedStringToFile(String image) throws IOException {
+		
 		String fileName = generateRandomName();
 		File target = new File(appConfiguration.getUploadPath()+"/"+fileName);
 		OutputStream outputStream = new FileOutputStream(target);
@@ -45,5 +56,11 @@ public class FileService {
 			e.printStackTrace();
 		}
 	}
+
+	public String dedectType(String value) {
+		byte[] base64encoded = Base64.getDecoder().decode(value);
+		return tika.detect(base64encoded);
+	}
+
 
 }
