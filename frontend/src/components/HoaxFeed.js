@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router'
-import { getHoaxes, getNewHoaxCount, getOldHoaxes } from '../api/apiCalls'
+import { getHoaxes, getNewHoaxCount, getNewHoaxes, getOldHoaxes } from '../api/apiCalls'
 import { useApiProgress } from '../shared/ApiProgress'
 import HoaxView from './HoaxView'
 import Spinner from './Spinner'
@@ -29,15 +29,15 @@ const HoaxFeed = () => {
     const oldHoaxPath = username ? `/api/1.0/users/${username}/hoaxes/${lastHoaxId}` : `/api/1.0/hoaxes/${lastHoaxId}`;
     const loadOldHoaxesProgress = useApiProgress('get', oldHoaxPath, true);
 
+    const loadNewHoaxesProgress = useApiProgress('get', `/api/1.0/hoaxes/${firstHoaxId}?direction=after`, true);
+
 
     useEffect(() => {
         const getCount = async () => {
             const response = await getNewHoaxCount(firstHoaxId, username);
             setNewHoaxCount(response.data.count);
         }
-        let looper = setInterval(() => {
-            getCount();
-        }, 1000)
+        let looper = setInterval(getCount, 1000);
         return function cleanup() {
             clearInterval(looper);
         }
@@ -66,6 +66,14 @@ const HoaxFeed = () => {
             content: [...previousHoaxPage.content, ...response.data.content]
         }));
     }
+    const loadNewHoaxes = async () => {
+        const response = await getNewHoaxes(firstHoaxId);
+        setHoaxPage(previousHoaxPage => ({
+            ...previousHoaxPage,
+            content: [...response.data, ...previousHoaxPage.content]
+        }));
+        setNewHoaxCount(0);
+    }
 
     const { content, last } = hoaxPage;
 
@@ -81,8 +89,12 @@ const HoaxFeed = () => {
         <div>
             {
                 newHoaxCount > 0 && (
-                    <div className="alert alert-secondary text-center mb-1">
-                        {t('There are new hoaxes')}
+                    <div
+                        className="alert alert-secondary text-center mb-1"
+                        onClick={loadNewHoaxesProgress ? () => { } : loadNewHoaxes}
+                        style={{ cursor: loadNewHoaxesProgress ? 'not-allowed' : 'pointer' }}
+                    >
+                        {loadNewHoaxesProgress ? <Spinner /> : t('There are new hoaxes')}
                     </div>
                 )
             }
@@ -94,7 +106,7 @@ const HoaxFeed = () => {
             {!last &&
                 <div
                     className="alert alert-secondary text-center"
-                    onClick={loadOldHoaxesProgress ? () => { } : () => loadOldHoaxes()}
+                    onClick={loadOldHoaxesProgress ? () => { } : loadOldHoaxes}
                     style={{ cursor: loadOldHoaxesProgress ? 'not-allowed' : 'pointer' }}
                 >
                     {loadOldHoaxesProgress ? <Spinner /> : t('Load old hoaxes')}
