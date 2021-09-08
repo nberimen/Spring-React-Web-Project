@@ -25,7 +25,8 @@ i18n.use(initReactI18next).init({
                 'Cancel': 'Cancel',
                 'My Profile': 'My Profile',
                 'There are no hoaxes': 'There are no hoaxes',
-                'Load old hoaxes': 'Load old hoaxes'
+                'Load old hoaxes': 'Load old hoaxes',
+                'There are new hoaxes':'There are new hoaxes'
             }
         },
         tr: {
@@ -49,7 +50,8 @@ i18n.use(initReactI18next).init({
                 'Cancel': 'İptal Et',
                 'My Profile': 'Profilim',
                 'There are no hoaxes': 'Hoax bulunamadı',
-                'Load old hoaxes': 'Eski Hoaxları getir'
+                'Load old hoaxes': 'Eski Hoaxları getir',
+                'There are new hoaxes':'Yeni Hoaxlar var'
             }
         }
     },
