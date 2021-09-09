@@ -13,9 +13,10 @@
   
   profiles:
     active:
-    - dev  
- hoaxify:
-  upload-path: picture-storage 
+    - dev    
+  servlet:
+    multipart:
+      max-file-size: 10MB
 ---
  spring:
   profiles: production

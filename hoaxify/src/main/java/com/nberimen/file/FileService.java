@@ -11,6 +11,7 @@ import java.util.UUID;
 
 import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.nberimen.configuration.AppConfiguration;
 
@@ -60,6 +61,22 @@ public class FileService {
 	public String dedectType(String value) {
 		byte[] base64encoded = Base64.getDecoder().decode(value);
 		return tika.detect(base64encoded);
+	}
+
+
+	public String saveHoaxAttachment(MultipartFile multipartFile) {
+		String fileName = generateRandomName();
+		File target = new File(appConfiguration.getUploadPath()+"/"+fileName);
+		
+		try {
+			OutputStream outputStream = new FileOutputStream(target);
+			outputStream.write(multipartFile.getBytes());
+			outputStream.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return fileName;
+		
 	}
 
 

@@ -2,26 +2,33 @@ import React, { useEffect, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { useSelector } from "react-redux"
 import ProfileImageWithDefault from "./ProfileImageWithDefault";
-import { postHoax } from "../api/apiCalls";
+import { postHoax, postHoaxAttachment } from "../api/apiCalls";
 import { useApiProgress } from "../shared/ApiProgress";
 import ButtonWithProgress from "./ButtonWithProgress";
+import Input from './Input';
+
 const HoaxSubmit = () => {
     const { image } = useSelector((store) => ({ image: store.image }));
     const [focused, setFocused] = useState(false);
     const [hoax, setHoax] = useState('');
     const [errors, setErrors] = useState({});
+    const [newImage, setNewImage] = useState();
     const { t } = useTranslation();
 
     useEffect(() => {
         if (!focused) {
             setHoax('');
             setErrors({});
+            setNewImage();
         }
     }, [focused])
 
     useEffect(() => {
         setErrors({});
     }, [hoax])
+
+    const pendingApiCall = useApiProgress('post', '/api/1.0/hoaxes');
+
     const onClickHoaxify = async () => {
         const body = {
             content: hoax
@@ -35,8 +42,25 @@ const HoaxSubmit = () => {
             }
         }
     }
+    const onChangeFile = (event) => {
+        if (event.target.files.length < 1) {
+            return;
+        }
+        const file = event.target.files[0];
+        const fileReader = new FileReader();
+        fileReader.onloadend = () => {
+            setNewImage(fileReader.result);
+            uploadFile(file);
+        }
+        fileReader.readAsDataURL(file);
 
-    const pendingApiCall = useApiProgress('post', '/api/1.0/hoaxes');
+    }
+    
+    const uploadFile = async (file) => {
+        const attachment = new FormData();
+        attachment.append('file', file);
+        await postHoaxAttachment(attachment);
+    }
 
     let textAreaClass = 'form-control';
     if (errors.content) {
@@ -60,23 +84,27 @@ const HoaxSubmit = () => {
                 />
                 <div className="invalid-feedback">{errors.content} </div>
                 {focused && (
-                    <div className="text-end mt-1">
-                        <ButtonWithProgress
-                            className="btn btn-primary"
-                            onClick={onClickHoaxify}
-                            text="Hoaxify"
-                            pendingApiCall={pendingApiCall}
-                            disabled={pendingApiCall}
-                        />
+                    <>
+                        <Input type="file" onChange={onChangeFile} />
+                        {newImage && <img className="img-thumbnail" src={newImage} alt="hoax-attachment" />}
+                        <div className="text-end mt-1">
+                            <ButtonWithProgress
+                                className="btn btn-primary"
+                                onClick={onClickHoaxify}
+                                text="Hoaxify"
+                                pendingApiCall={pendingApiCall}
+                                disabled={pendingApiCall}
+                            />
 
-                        <button
-                            className="btn btn-danger d-inline-flex ms-1"
-                            onClick={() => setFocused(false)}
-                            disabled={pendingApiCall}
-                        >
-                            <span className="material-icons">close</span>{t('Cancel')}
-                        </button>
-                    </div>
+                            <button
+                                className="btn btn-danger d-inline-flex ms-1"
+                                onClick={() => setFocused(false)}
+                                disabled={pendingApiCall}
+                            >
+                                <span className="material-icons">close</span>{t('Cancel')}
+                            </button>
+                        </div>
+                    </>
                 )}
             </div>
         </div>
