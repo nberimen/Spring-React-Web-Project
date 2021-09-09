@@ -1,8 +1,5 @@
 package com.nberimen.file;
 
-import java.util.Collections;
-import java.util.Map;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -16,8 +13,7 @@ public class FileController {
 	FileService fileService;
 	
 	@PostMapping("/api/1.0/hoax-attachments")
-	Map<String,String> saveHoaxAttachment(@RequestParam MultipartFile file) {
-		String fileName = fileService.saveHoaxAttachment(file);
-		return Collections.singletonMap("name", fileName);	
+	FileAttachment saveHoaxAttachment(@RequestParam MultipartFile file) {
+		return fileService.saveHoaxAttachment(file);
 	}
 }

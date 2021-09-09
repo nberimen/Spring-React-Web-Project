@@ -7,26 +7,34 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Base64;
+import java.util.Date;
+import java.util.List;
 import java.util.UUID;
 
 import org.apache.tika.Tika;
+import org.springframework.scheduling.annotation.EnableScheduling;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.nberimen.configuration.AppConfiguration;
 
 @Service
+@EnableScheduling
 public class FileService {
 	
 	
 	AppConfiguration appConfiguration;
+	
 	Tika tika;
 	
+	FileAttachmentRepository fileAttachmentRepository;
 	
-	public FileService(AppConfiguration appConfiguration) {
+	public FileService(AppConfiguration appConfiguration, FileAttachmentRepository fileAttachmentRepository) {
 		super();
 		this.appConfiguration = appConfiguration;
-		tika = new Tika();
+		this.tika = new Tika();
+		this.fileAttachmentRepository = fileAttachmentRepository;
 	}
 
 	
@@ -64,7 +72,7 @@ public class FileService {
 	}
 
 
-	public String saveHoaxAttachment(MultipartFile multipartFile) {
+	public FileAttachment saveHoaxAttachment(MultipartFile multipartFile) {
 		String fileName = generateRandomName();
 		File target = new File(appConfiguration.getUploadPath()+"/"+fileName);
 		
@@ -75,8 +83,22 @@ public class FileService {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return fileName;
+		FileAttachment attachment = new FileAttachment();
+		attachment.setName(fileName);
+		attachment.setDate(new Date());
+		return fileAttachmentRepository.save(attachment);
 		
+	}
+	
+	@Scheduled(fixedRate = 24 * 60 * 60 * 1000)
+	public void cleanupStorage() {
+		Date twentyFourHoursAgo = new Date(System.currentTimeMillis() - (24 * 60 * 60 * 1000));
+		List<FileAttachment> filesToBeDeleted = fileAttachmentRepository
+				.findByDateBeforeAndHoaxIsNull(twentyFourHoursAgo);
+		for (FileAttachment file : filesToBeDeleted) {
+			delete(file.getName());
+			fileAttachmentRepository.deleteById(file.getId());
+		}
 	}
 
 
