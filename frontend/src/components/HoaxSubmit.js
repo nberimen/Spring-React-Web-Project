@@ -22,6 +22,7 @@ const HoaxSubmit = () => {
             setHoax('');
             setErrors({});
             setNewImage();
+            setAttacmentId();
         }
     }, [focused])
 
