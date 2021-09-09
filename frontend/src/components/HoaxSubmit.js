@@ -6,6 +6,7 @@ import { postHoax, postHoaxAttachment } from "../api/apiCalls";
 import { useApiProgress } from "../shared/ApiProgress";
 import ButtonWithProgress from "./ButtonWithProgress";
 import Input from './Input';
+import AutoUploadImage from "./AutoUploadImage";
 
 const HoaxSubmit = () => {
     const { image } = useSelector((store) => ({ image: store.image }));
@@ -27,7 +28,8 @@ const HoaxSubmit = () => {
         setErrors({});
     }, [hoax])
 
-    const pendingApiCall = useApiProgress('post', '/api/1.0/hoaxes');
+    const pendingApiCall = useApiProgress('post', '/api/1.0/hoaxes', true);
+    const pendingFileUpload = useApiProgress('post', '/api/1.0/hoax-attachments', true);
 
     const onClickHoaxify = async () => {
         const body = {
@@ -55,7 +57,7 @@ const HoaxSubmit = () => {
         fileReader.readAsDataURL(file);
 
     }
-    
+
     const uploadFile = async (file) => {
         const attachment = new FormData();
         attachment.append('file', file);
@@ -85,21 +87,21 @@ const HoaxSubmit = () => {
                 <div className="invalid-feedback">{errors.content} </div>
                 {focused && (
                     <>
-                        <Input type="file" onChange={onChangeFile} />
-                        {newImage && <img className="img-thumbnail" src={newImage} alt="hoax-attachment" />}
+                        {!newImage && <Input type="file" onChange={onChangeFile} />}
+                        {newImage && <AutoUploadImage image={newImage} uploading={pendingFileUpload} />}
                         <div className="text-end mt-1">
                             <ButtonWithProgress
                                 className="btn btn-primary"
                                 onClick={onClickHoaxify}
                                 text="Hoaxify"
                                 pendingApiCall={pendingApiCall}
-                                disabled={pendingApiCall}
+                                disabled={pendingApiCall || pendingFileUpload}
                             />
 
                             <button
                                 className="btn btn-danger d-inline-flex ms-1"
                                 onClick={() => setFocused(false)}
-                                disabled={pendingApiCall}
+                                disabled={pendingApiCall || pendingFileUpload}
                             >
                                 <span className="material-icons">close</span>{t('Cancel')}
                             </button>
