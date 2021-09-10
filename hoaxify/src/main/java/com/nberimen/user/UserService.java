@@ -2,6 +2,7 @@ package com.nberimen.user;
 
 import java.io.IOException;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import com.nberimen.error.NotFoundException;
 import com.nberimen.file.FileService;
+import com.nberimen.hoax.HoaxService;
 import com.nberimen.user.vm.UserUpdateVM;
 
 
@@ -21,11 +23,18 @@ public class UserService {
 	
 	FileService fileService;
 	
+	HoaxService hoaxService;
 	
 	public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder,FileService fileService) {
 		this.userRepository = userRepository;
 		this.passwordEncoder = passwordEncoder;
 		this.fileService= fileService;
+	}
+
+
+	@Autowired
+	public void setHoaxService(HoaxService hoaxService) {
+		this.hoaxService = hoaxService;
 	}
 
 
@@ -70,6 +79,14 @@ public class UserService {
 			fileService.deleteProfileImage(oldImageName);
 		}
 		return userRepository.save(inDB);
+	}
+
+
+
+	public void deleteUser(String username) {
+		hoaxService.deleteHoaxesOfUser(username);
+		User inDB = userRepository.findByUsername(username);
+		userRepository.delete(inDB);
 	}
 
 
