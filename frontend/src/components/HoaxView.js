@@ -4,13 +4,21 @@ import ProfileImageWithDefault from './ProfileImageWithDefault'
 import { format } from 'timeago.js'
 import { useTranslation } from 'react-i18next';
 import { useSelector } from 'react-redux';
+import { deleteHoax } from '../api/apiCalls';
 const HoaxView = (props) => {
     const loggedInUser = useSelector(store => store.username);
-    const { hoax } = props;
-    const { user, content, timestamp, fileAttachment } = hoax;
+    const { hoax, onDeleteHoax } = props;
+    const { user, content, timestamp, fileAttachment, id } = hoax;
     const { username, displayName, image } = user;
 
     const { i18n } = useTranslation();
+
+    const onClickDelete = async () => {
+        await deleteHoax(id); 
+        onDeleteHoax(id);
+    }
+
+
 
     const formatted = format(timestamp, i18n.language);
 
@@ -37,11 +45,12 @@ const HoaxView = (props) => {
                         </span>
                     </Link>
                 </div>
-               {ownedByLoggedInUser && <button className="btn btn-delete-link btn-sm">
-                    <span className="material-icons">
-                        delete_outline
-                    </span>
-                </button>}
+                {ownedByLoggedInUser &&
+                    (<button className="btn btn-delete-link btn-sm" onClick={onClickDelete}>
+                        <span className="material-icons">
+                            delete_outline
+                        </span>
+                    </button>)}
             </div>
             <div className="ps-5">
                 {content}
