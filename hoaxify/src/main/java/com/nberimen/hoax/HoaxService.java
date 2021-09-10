@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 
 import com.nberimen.file.FileAttachment;
 import com.nberimen.file.FileAttachmentRepository;
+import com.nberimen.file.FileService;
 import com.nberimen.hoax.vm.HoaxSubmitVM;
 import com.nberimen.user.User;
 import com.nberimen.user.UserService;
@@ -22,11 +23,14 @@ public class HoaxService {
 	HoaxRepository hoaxRepository;
 	UserService userService;
 	FileAttachmentRepository fileAttachmentRepository;
+	FileService fileService;
 
-	public HoaxService(HoaxRepository hoaxRepository, UserService userService, FileAttachmentRepository fileAttachmentRepository) {
+	public HoaxService(HoaxRepository hoaxRepository, UserService userService,
+			FileAttachmentRepository fileAttachmentRepository, FileService fileService) {
 		this.hoaxRepository = hoaxRepository;
 		this.userService = userService;
 		this.fileAttachmentRepository = fileAttachmentRepository;
+		this.fileService = fileService;
 	}
 
 	public void save(HoaxSubmitVM hoaxSubmitVM, User user) {
@@ -35,8 +39,9 @@ public class HoaxService {
 		hoax.setTimestamp(new Date());
 		hoax.setUser(user);
 		hoaxRepository.save(hoax);
-		Optional<FileAttachment> optionalFileAttachment = fileAttachmentRepository.findById(hoaxSubmitVM.getAttachmentId());
-		if(optionalFileAttachment.isPresent()) {
+		Optional<FileAttachment> optionalFileAttachment = fileAttachmentRepository
+				.findById(hoaxSubmitVM.getAttachmentId());
+		if (optionalFileAttachment.isPresent()) {
 			FileAttachment fileAttachment = optionalFileAttachment.get();
 			fileAttachment.setHoax(hoax);
 			fileAttachmentRepository.save(fileAttachment);
@@ -98,6 +103,11 @@ public class HoaxService {
 	}
 
 	public void delete(long id) {
+		Hoax inDB = hoaxRepository.getOne(id);
+		if (inDB.getFileAttachment() != null) {
+			String fileName = inDB.getFileAttachment().getName();
+			fileService.deleteAttachmentFile(fileName);
+		}
 		hoaxRepository.deleteById(id);
 	}
 }
