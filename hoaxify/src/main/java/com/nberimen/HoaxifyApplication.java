@@ -6,8 +6,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Profile;
 
-import com.nberimen.hoax.Hoax;
 import com.nberimen.hoax.HoaxService;
+import com.nberimen.hoax.vm.HoaxSubmitVM;
 import com.nberimen.user.User;
 import com.nberimen.user.UserService;
 
@@ -28,8 +28,8 @@ public class HoaxifyApplication {
 				user.setDisplayName("display" + i);
 				user.setPassword("P4ssword");
 				userService.save(user);
-				for (int j = 1; j <= 2; j++) {
-					Hoax hoax = new Hoax();
+				for (int j = 1; j <= 20; j++) {
+					HoaxSubmitVM hoax = new HoaxSubmitVM();
 					hoax.setContent("hoax (" + j + ") from user (" + i +")");
 					hoaxService.save(hoax, user);
 				}
