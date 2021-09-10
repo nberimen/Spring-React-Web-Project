@@ -16,7 +16,7 @@ const HoaxView = (props) => {
 
     const pendingApiCall = useApiProgress('delete', `/api/1.0/hoaxes/${id}`, true);
 
-    const { i18n } = useTranslation();
+    const { t, i18n } = useTranslation();
 
     const onClickDelete = async () => {
         await deleteHoax(id);
@@ -75,16 +75,22 @@ const HoaxView = (props) => {
                     </div>
                 )}
             </div>
-            <Modal 
-            visible={modalVisible}
-            onClickCancel={onClickCancel}
-            onClickOk={onClickDelete}
-            pendingApiCall={pendingApiCall}
-            message={
-                <span>
-                    {content}
-                </span>
-            }
+            <Modal
+                title={t('Delete Hoax')}
+                visible={modalVisible}
+                onClickCancel={onClickCancel}
+                onClickOk={onClickDelete}
+                pendingApiCall={pendingApiCall}
+                message={
+                    <div>
+                        <div>
+                            <strong>{t('Are you sure to delete hoax?')}</strong>
+                        </div>
+                        <span>
+                            {content}
+                        </span>
+                    </div>
+                }
             />
         </>
 
