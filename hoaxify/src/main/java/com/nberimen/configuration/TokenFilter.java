@@ -17,22 +17,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import com.nberimen.auth.AuthService;
 
 public class TokenFilter extends OncePerRequestFilter {
-	
+
 	@Autowired
 	AuthService authService;
 
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
-		
+
 		String authorization = request.getHeader("Authorization");
-		if(authorization != null) {
+		if (authorization != null) {
 			String token = authorization.substring(7);
-			
+
 			UserDetails user = authService.getUserDetails(token);
-			UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, user.getAuthorities());
-			authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-			SecurityContextHolder.getContext().setAuthentication(authentication);
+			if (user != null) {
+				UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null,
+						user.getAuthorities());
+				authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+				SecurityContextHolder.getContext().setAuthentication(authentication);
+			}
 		}
 		filterChain.doFilter(request, response);
 	}
