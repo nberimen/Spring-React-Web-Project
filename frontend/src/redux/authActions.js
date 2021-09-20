@@ -1,11 +1,18 @@
 import * as ACTIONS from "./Constans";
-import { login, signup } from "../api/apiCalls";
+import { login, signup, logout } from "../api/apiCalls";
 
 
 export const logoutSuccess = () => {
-    return {
-        type: ACTIONS.LOGOUT_SUCCESS
-    };
+    return async function (dispatch) {
+        try {
+            await logout();
+        } catch (error) {
+
+        }
+        dispatch({
+            type: ACTIONS.LOGOUT_SUCCESS
+        })
+    }
 }
 
 export const loginSuccess = (authState) => {
@@ -15,7 +22,7 @@ export const loginSuccess = (authState) => {
     }
 }
 
-export const updateSuccess = ({displayName, image}) => {
+export const updateSuccess = ({ displayName, image }) => {
     return {
         type: ACTIONS.UPDATE_SUCCESS,
         payload: {
